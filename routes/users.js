@@ -1,24 +1,29 @@
 var express = require("express");
 var router = express.Router();
-const mysql = require("mysql");
-const dbconfig = require("../config/database.js");
-const connection = mysql.createConnection(dbconfig);
-
-const app = express();
-
-app.set("port", process.env.PORT || 3306);
+const db = require("../db");
 
 /* GET users listing. */
-app.get("/", (req, res)=> {
-  connection.query("SELECT * FROM bamsaeng.Customer;", (error, rows) => {
-    if (error) throw error;
-    console.log("Customer info is: ", rows);
-    res.send(rows);
-  });
+router.get("/", async (req, res) => {
+  const conn = await db.getConnection();
+  const query = "SELECT * FROM Customer";
+  const [result] = await conn.query(query);
+  conn.release();
+  res.send(result);
+  // db.getConnection((err, conn) => {
+  //   if (err) throw err;
+  //   const query = "SELECT * FROM bamsaeng.Customer";
+  //   // const query = `INSERT INTO Customer (customerNo, password, customerName, custoerId) VALUES (?,?,?,?);`
+  //   conn.query(query, (err, result) => {
+  //     if (err) throw err;
+  //     conn.release();
+  //     res.send(result);
+  //   });
+  // });
+  // // connection.query("SELECT * FROM bamsaeng.Customer;", (error, rows) => {
+  // //   if (error) throw error;
+  // //   console.log("Customer info is: ", rows);
+  // //   res.send(rows);
+  // // });
 });
-
-app.listen(app.get("port"), ()=>{
-  console.log("Express server listening on port " + app.get("port"))
-})
 
 module.exports = router;
